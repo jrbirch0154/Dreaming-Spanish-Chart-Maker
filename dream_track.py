@@ -151,11 +151,13 @@ with st.expander("How to get your auth token"):
     st.markdown(
         """
     1. Log into [Dreaming Spanish](https://app.dreaming.com)
-    2. Open your browser's developer tools (F12)
-    3. Go to the **Network** tab
-    4. Click on any request to the Dreaming Spanish API
-    5. Look for the **Authorization** header in the request headers
-    6. Copy the full value starting with `Bearer ...`
+    2. Open your browser's developer tools by pressing **F12** (or right-click anywhere on the page + **Inspect**)
+    3. Click the **Network** tab at the top of the developer tools panel
+    4. **Refresh the page** (F5) so requests start appearing in the list
+    5. In the filter/search box, type **dayWatchedTime** to narrow down the results
+    6. Click on the request that appears
+    7. Scroll down to **Request Headers** and find the **authorization** field
+    8. Copy the full value. It starts with `Bearer eyJ...`
     """
     )
 
