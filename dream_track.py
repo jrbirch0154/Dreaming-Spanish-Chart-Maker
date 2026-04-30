@@ -200,6 +200,8 @@ if st.button("Run"): # On hitting run
                     break
 
             total_days = len(df)  # it doesn't include 0 days
+            
+            csv = df.to_csv(index=False)
 
             # --------------- ST work
             col1, col2, col3 = st.columns(3)
@@ -227,6 +229,11 @@ if st.button("Run"): # On hitting run
             st.plotly_chart(line_fig)
             st.plotly_chart(bar_fig)
             st.plotly_chart(violin_fig)
+            
+            st.download_button(label='Download data as CSV',
+                               data=csv,
+                               file_name='dreaming_spanish_data.csv',
+                               mime='text/csv')
 
         except:
             st.error("Data not found")
