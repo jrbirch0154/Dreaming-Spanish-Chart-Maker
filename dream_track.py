@@ -92,11 +92,11 @@ def bar_graph(df:pd.DataFrame,daily_goal):
 st.set_page_config(page_title='Dreaming Spanish Tracker',
                    layout='wide')
 
-st.title('Dreaming Spanish Tracking Chart')
+st.title('Dreaming Spanish Hours Chart')
 
-starting_hours = st.text_input('Enter your starting hours: ')
+auth_token = st.text_input('Enter your auth token:', type='password')
 
-daily_goal = st.text_input('Enter your daily goal (M): ')
+st.caption('Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish.')
 
 with st.expander("How to get your auth token"):
     st.markdown("""
@@ -108,11 +108,12 @@ with st.expander("How to get your auth token"):
     6. Copy the full value starting with `Bearer ...`
     """)
 
-auth_token = st.text_input('Enter your auth token:', type='password')
-
-st.caption('Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish.')
 
 headers = {'authorization': auth_token}
+
+starting_hours = st.text_input('Enter your starting hours (Optional): ')
+
+daily_goal = st.text_input('Enter your current daily goal in minutes (Optional): ')
 
 if st.button('Run'):
     if (auth_token):
