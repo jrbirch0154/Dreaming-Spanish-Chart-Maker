@@ -111,7 +111,7 @@ def bar_graph(df: pd.DataFrame, daily_goal):
 def box_graph(df: pd.DataFrame, daily_goal):
     fig3 = go.Figure()
 
-    fig3.add_trace(go.Violin(x=df["date"].dt.day_name(), y=df["timeMinutes"]))
+    fig3.add_trace(go.Violin(x=df["date"].dt.day_name(), y=df["timeMinutes"],spanmode='hard',meanline_visible=True))
 
     fig3.add_hline(y=daily_goal, line_dash="dash", line_color="red")
     # annotation_text='Daily goal',annotation_position='top right')
