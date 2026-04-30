@@ -108,6 +108,33 @@ def bar_graph(df: pd.DataFrame, daily_goal):
     return fig2
 
 
+def box_graph(df: pd.DataFrame, daily_goal):
+    fig3 = go.Figure()
+
+    fig3.add_trace(go.Violin(x=df["date"].dt.day_name(), y=df["timeMinutes"]))
+
+    fig3.add_hline(y=daily_goal, line_dash="dash", line_color="red")
+    # annotation_text='Daily goal',annotation_position='top right')
+
+    day_order = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ]
+
+    fig3.update_xaxes(categoryorder="array", categoryarray=day_order)
+    
+    fig3.update_layout(title='Daily Input Averages',
+                       xaxis_title='Day of the week',
+                       yaxis_title='Minutes of Input')
+
+    return fig3
+
+
 # %% Streamlit
 
 st.set_page_config(page_title="Dreaming Spanish Tracker", layout="wide")
@@ -141,8 +168,8 @@ daily_goal = st.text_input(
     "Enter your current daily goal in minutes (Optional): "
 )
 
-if st.button("Run"):
-    if auth_token:
+if st.button("Run"): # On hitting run
+    if auth_token: # If the auth token is in
         starting_hours = float(starting_hours) if starting_hours else 0
         daily_goal = float(daily_goal) if daily_goal else 0
 
@@ -152,52 +179,52 @@ if st.button("Run"):
             df = make_dataframe(data, starting_hours)
             st.success("Data found")
             
-            start_date = df['date'].min().strftime('%Y-%m-%d')
-            days_since_started = (df['date'].max() - df['date'].min()).days
-            
-            best_row = df.loc[df['timeMinutes'].idxmax()]
-            
-            best_day = best_row['date'].strftime('%Y-%m-%d')
-            best_day_minutes = best_row['timeMinutes']
-            
-            current_streak = df[df['timeSeconds'] > 0]['date'].dt.date
+            #------------- Metrics math
+            start_date = df["date"].min().strftime("%Y-%m-%d")
+            days_since_started = (df["date"].max() - df["date"].min()).days
+
+            best_row = df.loc[df["timeMinutes"].idxmax()]
+
+            best_day = best_row["date"].strftime("%Y-%m-%d")
+            best_day_minutes = best_row["timeMinutes"]
+
+            current_streak = df[df["timeSeconds"] > 0]["date"].dt.date
             diff = current_streak.diff().dt.days
             streak = 0
             for d in diff.iloc[::-1]:
-                if d==1:
-                    streak +=1
+                if d == 1:
+                    streak += 1
                 else:
                     break
-                
-            total_days = len(df) # it doesn't include 0 days
-            
-            
-            #--------------- ST work
+
+            total_days = len(df)  # it doesn't include 0 days
+
+            # --------------- ST work
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric('Total Hours', f"{df['totalHours'].max():.1f}")
-                st.metric('Day started:', f"{start_date}")
+                st.metric("Total Hours", f"{df['totalHours'].max():.1f}")
+                st.metric("Day started:", f"{start_date}")
             with col2:
-                st.metric('Avg Min/Day', f"{df['timeMinutes'].mean():.1f}",
-                          delta=f"{df['timeMinutes'].mean() - daily_goal:.1f} vs goal")
-                # st.metric('Days Since Started', days_since_started)
-                st.metric('Current streak:', f"{streak} days")
-                
-            with col3:
-                st.metric('Total days of input:', total_days)
-                st.metric('Best day:', best_day, delta=f"{best_day_minutes:.0f}m")
+                st.metric(
+                    "Avg Min/Day",
+                    f"{df['timeMinutes'].mean():.1f}",
+                    delta=f"{df['timeMinutes'].mean() - daily_goal:.1f} vs goal",
+                )
+                st.metric("Current streak:", f"{streak} days")
 
-                
+            with col3:
+                st.metric("Total days of input:", total_days)
+                st.metric(
+                    "Best day:", best_day, delta=f"{best_day_minutes:.0f}m"
+                )
 
             line_fig = line_graph(df)
-
             bar_fig = bar_graph(df, daily_goal)
+            violin_fig = box_graph(df, daily_goal)
 
             st.plotly_chart(line_fig)
             st.plotly_chart(bar_fig)
-            
-            
-            
+            st.plotly_chart(violin_fig)
 
         except:
             st.error("Data not found")
