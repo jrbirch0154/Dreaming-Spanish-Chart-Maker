@@ -45,6 +45,8 @@ def make_dataframe(data, starting_hours) -> pd.DataFrame:
     df["totalHours"] = (
         (df["timeMinutes"] / 60).cumsum() + starting_hours
     ).round(2)
+    df['month'] = df['date'].dt.to_period('M')
+    
 
     return df
 
@@ -91,7 +93,7 @@ def line_graph(df: pd.DataFrame):
     return fig
 
 
-def bar_graph(df: pd.DataFrame, daily_goal):
+def bar_graph_day(df: pd.DataFrame, daily_goal):
     fig2 = px.bar(df, x="date", y="timeMinutes", color="goalReached")
 
     fig2.add_hline(
@@ -133,6 +135,23 @@ def box_graph(df: pd.DataFrame, daily_goal):
                        yaxis_title='Minutes of Input')
 
     return fig3
+
+def bar_graph_month(df: pd.DataFrame, daily_goal):
+    df_m = df.groupby('month')['timeMinutes'].sum().reset_index()
+    df_m['month'] = df_m['month'].astype(str)
+    df_m['timeHours'] = (df_m['timeMinutes']/60).round(2)
+    
+    fig2 = px.bar(df_m,x='month', y='timeHours',
+                  color='timeHours', color_continuous_scale='Viridis',
+                  labels={'timeHours': 'Hours'})
+
+    fig2.update_layout(
+        title="Hours per month", xaxis_title="Date", yaxis_title="Hours"
+    )
+
+    # fig2.show()
+    return fig2
+
 
 
 # %% Streamlit
@@ -189,6 +208,9 @@ if st.button("Run"): # On hitting run
 
             best_day = best_row["date"].strftime("%Y-%m-%d")
             best_day_minutes = best_row["timeMinutes"]
+            best_month = str(df.groupby('month')['timeMinutes'].sum().idxmax())
+            best_month_hours = df.groupby('month')['timeMinutes'].sum().max() / 60
+            
 
             current_streak = df[df["timeSeconds"] > 0]["date"].dt.date
             diff = current_streak.diff().dt.days
@@ -204,30 +226,44 @@ if st.button("Run"): # On hitting run
             csv = df.to_csv(index=False)
 
             # --------------- ST work
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
             with col1:
                 st.metric("Total Hours", f"{df['totalHours'].max():.1f}")
                 st.metric("Day started:", f"{start_date}")
+                
             with col2:
+                st.metric("Total days of input:", total_days)
+                st.metric(
+                    "Best day:", best_day, delta=f"{best_day_minutes:.0f}m"
+                )
+                
+                
+            with col3:
+                st.metric("Current streak:", f"{streak} days")
+                st.metric(
+                    "Best month:", best_month, delta=f"{best_month_hours:.1f}h"
+                )
+                
+ 
+            with col4:
                 st.metric(
                     "Avg Min/Day",
                     f"{df['timeMinutes'].mean():.1f}",
                     delta=f"{df['timeMinutes'].mean() - daily_goal:.1f} vs goal",
                 )
-                st.metric("Current streak:", f"{streak} days")
-
-            with col3:
-                st.metric("Total days of input:", total_days)
-                st.metric(
-                    "Best day:", best_day, delta=f"{best_day_minutes:.0f}m"
-                )
+                
+                
+                
+                
 
             line_fig = line_graph(df)
-            bar_fig = bar_graph(df, daily_goal)
+            bar_fig_day = bar_graph_day(df, daily_goal)
             violin_fig = box_graph(df, daily_goal)
+            bar_fig_month = bar_graph_month(df,daily_goal)
 
             st.plotly_chart(line_fig)
-            st.plotly_chart(bar_fig)
+            st.plotly_chart(bar_fig_month)
+            st.plotly_chart(bar_fig_day)
             st.plotly_chart(violin_fig)
             
             st.download_button(label='Download data as CSV',
