@@ -26,7 +26,6 @@ MILESTONES = {
 
 # %% Requesting
 
-@st.cache_data(ttl=3600) # Cache data, expires after 1 hour
 def request_dreaming(headers, URL=URL) -> list:
 
     response = requests.get(URL, headers=headers)
@@ -163,7 +162,7 @@ st.title("Dreaming Spanish Hours Chart")
 auth_token = st.text_input("Enter your auth token:", type="password")
 
 st.caption(
-    "Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish."
+    "Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish. Be aware that your auth token has full access to your Dreaming Spanish account, including the ability to modify your email. If you are uncomfortable with this, skip it."
 )
 
 with st.expander("How to get your auth token"):
