@@ -26,7 +26,7 @@ MILESTONES = {
 
 # %% Requesting
 
-
+@st.cache_data(ttl=3600) # Cache data, expires after 1 hour
 def request_dreaming(headers, URL=URL) -> list:
 
     response = requests.get(URL, headers=headers)
