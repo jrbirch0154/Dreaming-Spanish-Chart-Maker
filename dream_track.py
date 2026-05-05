@@ -94,6 +94,8 @@ def line_graph(df: pd.DataFrame):
 
 def bar_graph_day(df: pd.DataFrame, daily_goal):
     fig2 = px.bar(df, x="date", y="timeMinutes", color="goalReached")
+    
+    df['rolling_avg'] = df['timeMinutes'].rolling(7).mean()
 
     fig2.add_hline(
         y=daily_goal,
@@ -103,6 +105,14 @@ def bar_graph_day(df: pd.DataFrame, daily_goal):
     )
     fig2.update_layout(
         title="Minutes per Day", xaxis_title="Date", yaxis_title="Minutes"
+    )
+    
+    fig2.add_scatter(
+        x=df['date'],
+        y=df['rolling_avg'],
+        line=dict(width=2, color="black"),
+        name="Rolling Average (7d)",
+        hovertemplate="Date: %{x}<br>7 Day Rolling Avg: %{y:.1f} min<extra></extra>",
     )
 
     # fig2.show()
