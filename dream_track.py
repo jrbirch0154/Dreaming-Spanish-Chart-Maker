@@ -146,9 +146,12 @@ def box_graph(df: pd.DataFrame, daily_goal):
     return fig3
 
 def bar_graph_month(df: pd.DataFrame, daily_goal):
-    df_m = df.groupby('month')['timeMinutes'].sum().reset_index()
+    df_m = df.copy()
+    df_m = df_m.groupby('month')['timeMinutes'].sum().reset_index()
     df_m['month'] = df_m['month'].astype(str)
     df_m['timeHours'] = (df_m['timeMinutes']/60).round(2)
+    
+    df_m['monthly_rolling'] = df_m['timeHours'].rolling(3).mean()
     
     fig2 = px.bar(df_m,x='month', y='timeHours',
                   color='timeHours', color_continuous_scale='Viridis',
@@ -156,6 +159,14 @@ def bar_graph_month(df: pd.DataFrame, daily_goal):
 
     fig2.update_layout(
         title="Hours per month", xaxis_title="Date", yaxis_title="Hours"
+    )
+    
+    fig2.add_scatter(
+        x=df_m['month'],
+        y=df_m['monthly_rolling'],
+        line=dict(width=2, color="black"),
+        name="Rolling Average (3 months)",
+        hovertemplate="Date: %{x}<br>3 Month Rolling Avg: %{y:.1f} hours<extra></extra>",
     )
 
     # fig2.show()
@@ -172,7 +183,7 @@ st.title("Dreaming Spanish Hours Chart")
 auth_token = st.text_input("Enter your auth token:", type="password")
 
 st.caption(
-    "Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish. Be aware that your auth token has full access to your Dreaming Spanish account, including the ability to modify your email. If you are uncomfortable with this, skip it."
+    "Your auth token is never stored or transmitted anywhere other than directly to Dreaming Spanish. Treat it like a password and be mindful of where you enter it."
 )
 
 with st.expander("How to get your auth token"):
